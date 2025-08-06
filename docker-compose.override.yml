@@ -1,0 +1,29 @@
+# Override file for local development
+# This file is automatically loaded by docker-compose for development
+
+version: '3.8'
+
+services:
+  web:
+    volumes:
+      # Mount source code for hot reloading in development
+      - .:/app
+      - /app/__pycache__
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    ports:
+      - "5000:5000"
+    command: python main.py
+
+  db:
+    ports:
+      # Expose PostgreSQL port for development tools
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=medlab123  # Simple password for development
+
+  # Remove nginx in development to directly access the app
+  nginx:
+    profiles:
+      - production  # Only run nginx in production profile
