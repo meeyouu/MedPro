@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Report Detail - MedLab Pro{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto">
+    <!-- Report Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 animate-slide-up">
+        <div>
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+                {{ report.title }}
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">Report #{{ report.report_number }} | Generated {{ report.created_at.strftime('%B %d, %Y') if report.created_at else 'N/A' }}</p>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="downloadReport({{ report.id }})" class="btn-secondary px-4 py-2 rounded-lg">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Download PDF
+            </button>
+            <a href="{{ url_for('reports') }}" class="btn-primary px-4 py-2 rounded-lg">
+                Back to Reports
+            </a>
+        </div>
+    </div>
+
+    <!-- Patient Information -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="lg:col-span-2">
+            <!-- Overall Assessment -->
+            <div class="glass-card p-6 mb-6 animate-slide-up">
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Overall Assessment
+                </h3>
+                <div class="prose dark:prose-invert max-w-none">
+                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed text-right">{{ ai_analysis.overall_assessment or 'No assessment available' }}</p>
+                </div>
+            </div>
+
+            <!-- Individual Tests Analysis -->
+            {% if ai_analysis.individual_tests %}
+            <div class="glass-card p-6 mb-6 animate-slide-up" style="animation-delay: 0.1s">
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                    Individual Test Analysis
+                </h3>
+                <div class="space-y-4">
+                    {% for test_name, test_data in ai_analysis.individual_tests.items() %}
+                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-semibold text-gray-800 dark:text-white">{{ test_name }}</h4>
+                            <span class="px-3 py-1 rounded-full text-xs font-medium
+                                {% if test_data.status == 'normal' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                {% elif test_data.status == 'abnormal' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                {% elif test_data.status == 'critical' %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                {% endif %}">
+                                {{ test_data.status.title() }}
+                            </span>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-2 text-right">{{ test_data.findings }}</p>
+                        <p class="text-gray-700 dark:text-gray-300 text-sm text-right"><strong>Clinical Significance:</strong> {{ test_data.clinical_significance }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Probable Diseases -->
+            {% if ai_analysis.probable_diseases %}
+            <div class="glass-card p-6 mb-6 animate-slide-up" style="animation-delay: 0.2s">
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                    Probable Diseases
+                </h3>
+                <div class="space-y-4">
+                    {% for disease, data in ai_analysis.probable_diseases.items() %}
+                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-semibold text-gray-800 dark:text-white text-right">{{ disease }}</h4>
+                            <div class="flex items-center">
+                                <div class="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-2">
+                                    <div class="bg-gradient-to-r from-red-500 to-orange-500 h-2 rounded-full" style="width: {{ data.probability }}%"></div>
+                                </div>
+                                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ data.probability }}%</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm text-right">{{ data.reasoning }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Recommendations -->
+            {% if ai_analysis.recommendations %}
+            <div class="glass-card p-6 mb-6 animate-slide-up" style="animation-delay: 0.3s">
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Clinical Recommendations
+                </h3>
+                <ul class="space-y-3">
+                    {% for recommendation in ai_analysis.recommendations %}
+                    <li class="flex items-start">
+                        <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-gray-700 dark:text-gray-300 text-right">{{ recommendation }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+            <!-- Patient Information -->
+            <div class="glass-card p-6 mb-6 animate-slide-up" style="animation-delay: 0.4s">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Patient Information</h3>
+                <div class="space-y-3">
+                    <div>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">Name:</span>
+                        <p class="font-medium text-gray-800 dark:text-white">{{ report.patient.first_name }} {{ report.patient.last_name }}</p>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">Age:</span>
+                        <p class="font-medium text-gray-800 dark:text-white">{{ report.patient.age or 'N/A' }} years</p>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">Gender:</span>
+                        <p class="font-medium text-gray-800 dark:text-white">{{ report.patient.gender or 'N/A' }}</p>
+                    </div>
+                    {% if report.patient.current_symptoms %}
+                    <div>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">Current Symptoms:</span>
+                        <p class="font-medium text-gray-800 dark:text-white text-right">{{ report.patient.current_symptoms }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Red Flags -->
+            {% if ai_analysis.red_flags %}
+            <div class="glass-card p-6 mb-6 animate-slide-up border-l-4 border-red-500" style="animation-delay: 0.5s">
+                <h3 class="text-lg font-semibold text-red-600 dark:text-red-400 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    Critical Alerts
+                </h3>
+                <ul class="space-y-2">
+                    {% for flag in ai_analysis.red_flags %}
+                    <li class="flex items-start">
+                        <svg class="w-4 h-4 text-red-500 mr-2 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-red-600 dark:text-red-400 text-sm text-right">{{ flag }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Follow-up -->
+            {% if ai_analysis.follow_up %}
+            <div class="glass-card p-6 mb-6 animate-slide-up" style="animation-delay: 0.6s">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    Follow-up Instructions
+                </h3>
+                <p class="text-gray-700 dark:text-gray-300 text-sm text-right">{{ ai_analysis.follow_up }}</p>
+            </div>
+            {% endif %}
+
+            <!-- AI Confidence -->
+            {% if report.ai_confidence_score %}
+            <div class="glass-card p-6 animate-slide-up" style="animation-delay: 0.7s">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">AI Analysis Confidence</h3>
+                <div class="flex items-center">
+                    <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-3 mr-3">
+                        <div class="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full" style="width: {{ (report.ai_confidence_score * 100)|round }}%"></div>
+                    </div>
+                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ (report.ai_confidence_score * 100)|round }}%</span>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">This analysis was generated using AI and should be reviewed by a qualified medical professional.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Clinical Interpretation -->
+    {% if ai_analysis.interpretation %}
+    <div class="glass-card p-6 animate-slide-up" style="animation-delay: 0.8s">
+        <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+            <svg class="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Clinical Interpretation
+        </h3>
+        <div class="prose dark:prose-invert max-w-none">
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed text-right">{{ ai_analysis.interpretation }}</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function downloadReport(reportId) {
+    console.log('Download report:', reportId);
+    // Implement PDF download functionality
+    window.open(`/reports/${reportId}/download`, '_blank');
+}
+</script>
+{% endblock %}

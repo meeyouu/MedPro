@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ report.title }} - MedLab Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Vazirmatn', sans-serif; }
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .section-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            margin-bottom: 24px;
+            padding: 24px;
+        }
+        .status-normal { background: linear-gradient(135deg, #10b981, #059669); }
+        .status-abnormal { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .status-critical { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .progress-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        
+        <!-- Header -->
+        <div class="section-card mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold text-gray-800">{{ report.title }}</h1>
+                <div class="flex gap-4">
+                    <span class="px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium">نهایی</span>
+                    <span class="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">شماره گزارش: {{ report.report_number }}</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                <div><strong>بیمار:</strong> {{ report.patient.first_name }} {{ report.patient.last_name }}</div>
+                <div><strong>سن:</strong> {{ (report.patient.date_of_birth and ((date.today() - report.patient.date_of_birth).days // 365)) or 'نامشخص' }} سال</div>
+                <div><strong>تاریخ گزارش:</strong> {{ report.created_at.strftime('%Y/%m/%d') if report.created_at else 'نامشخص' }}</div>
+            </div>
+        </div>
+
+        <!-- Risk Distribution Chart -->
+        <div class="section-card">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold">!</div>
+                <h2 class="text-xl font-bold text-gray-800">ارزیابی ریسک بیماری‌ها</h2>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="flex justify-center">
+                    <div class="w-80 h-80 relative">
+                        <canvas id="riskChart"></canvas>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="text-sm text-gray-600 mb-4">توزیع ریسک‌های سلامتی</div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-4 h-4 bg-green-500 rounded"></div>
+                        <span class="text-sm">وضعیت سالم</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-4 h-4 bg-yellow-500 rounded"></div>
+                        <span class="text-sm">ریسک متوسط</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-4 h-4 bg-red-500 rounded"></div>
+                        <span class="text-sm">ریسک بالا</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overall Assessment -->
+        <div class="section-card">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">?</div>
+                <h2 class="text-xl font-bold text-gray-800">Overall Assessment (English)</h2>
+            </div>
+            <div class="bg-blue-50 p-6 rounded-lg">
+                <p class="text-gray-800 leading-relaxed">{{ ai_analysis.overall_assessment }}</p>
+            </div>
+        </div>
+
+        <!-- Comprehensive Disease Analysis -->
+        <div class="section-card">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">🔍</div>
+                <h2 class="text-xl font-bold text-gray-800">تحلیل جامع ۵ بیماری محتمل</h2>
+            </div>
+            
+            {% if report.detailed_diseases %}
+            {% set detailed_analysis = report.detailed_diseases|from_json %}
+            <div class="space-y-6">
+                {% for disease in detailed_analysis.diseases %}
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="progress-circle status-{% if disease.probability >= 80 %}critical{% elif disease.probability >= 60 %}abnormal{% else %}normal{% endif %} flex-shrink-0">
+                            {{ disease.probability }}%
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-800 text-xl mb-2">{{ loop.index }}. {{ disease.name }}</h3>
+                            <p class="text-gray-700 leading-relaxed mb-4">{{ disease.explanation }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Causes -->
+                        <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+                            <h4 class="font-semibold text-red-800 mb-2 flex items-center gap-2">
+                                <span class="text-red-500">⚠</span> علل و عوامل ریسک
+                            </h4>
+                            <ul class="text-sm text-red-700 space-y-1">
+                                {% for cause in disease.causes %}
+                                <li class="flex items-start gap-2">
+                                    <span class="text-red-500 mt-1">•</span>
+                                    <span>{{ cause }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        
+                        <!-- Findings -->
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                            <h4 class="font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                                <span class="text-blue-500">🔬</span> یافته‌های کلینیکی
+                            </h4>
+                            <ul class="text-sm text-blue-700 space-y-1">
+                                {% for finding in disease.findings %}
+                                <li class="flex items-start gap-2">
+                                    <span class="text-blue-500 mt-1">•</span>
+                                    <span>{{ finding }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Recommendation -->
+                    <div class="mt-4 bg-green-50 p-4 rounded-lg border border-green-200">
+                        <h4 class="font-semibold text-green-800 mb-2 flex items-center gap-2">
+                            <span class="text-green-500">💡</span> توصیه‌های تشخیصی و درمانی
+                        </h4>
+                        <p class="text-sm text-green-700">{{ disease.recommendation }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="space-y-4">
+                {% for disease, data in ai_analysis.probable_diseases.items() %}
+                <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                    <div class="flex items-center gap-4 mb-3">
+                        <div class="progress-circle status-{% if data.probability >= 80 %}critical{% elif data.probability >= 60 %}abnormal{% else %}normal{% endif %}">
+                            {{ data.probability }}%
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-800 text-lg">{{ loop.index }}. {{ disease }}</h3>
+                            <p class="text-gray-600 text-sm mt-1">{{ data.reasoning }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Individual Test Results -->
+        <div class="section-card">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">📊</div>
+                <h2 class="text-xl font-bold text-gray-800">Individual Test Results</h2>
+            </div>
+            <div class="space-y-4">
+                {% for test_name, test_data in ai_analysis.individual_tests.items() %}
+                <div class="bg-{% if test_data.status == 'normal' %}green{% elif test_data.status == 'abnormal' %}yellow{% else %}red{% endif %}-50 p-4 rounded-lg border border-{% if test_data.status == 'normal' %}green{% elif test_data.status == 'abnormal' %}yellow{% else %}red{% endif %}-200">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-gray-800">{{ test_name }} - {% if test_data.status == 'normal' %}NORMAL{% elif test_data.status == 'abnormal' %}ABNORMAL{% else %}CRITICAL{% endif %} 
+                            {% if test_data.status == 'normal' %}✓{% elif test_data.status == 'abnormal' %}⚠{% else %}🔴{% endif %}
+                        </h3>
+                    </div>
+                    <div class="text-sm text-gray-600 mb-2"><strong>Findings:</strong></div>
+                    <p class="text-gray-700 mb-3">{{ test_data.findings }}</p>
+                    <div class="text-sm text-gray-600 mb-2"><strong>Clinical Significance:</strong></div>
+                    <p class="text-gray-700">{{ test_data.clinical_significance }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Test Charts -->
+        <div class="section-card">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">📈</div>
+                <h2 class="text-xl font-bold text-gray-800">نمودارهای آزمایش</h2>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Cholesterol Chart -->
+                <div class="bg-white p-4 rounded-lg shadow h-80">
+                    <h3 class="text-center font-bold mb-4">پنل چربی‌ها</h3>
+                    <div class="h-64 relative">
+                        <canvas id="cholesterolChart"></canvas>
+                    </div>
+                </div>
+                <!-- Kidney Function Chart -->
+                <div class="bg-white p-4 rounded-lg shadow h-80">
+                    <h3 class="text-center font-bold mb-4">پنل عملکرد کلیه</h3>
+                    <div class="h-64 relative">
+                        <canvas id="kidneyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Critical Findings -->
+        <div class="section-card">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold">⚠</div>
+                <h2 class="text-xl font-bold text-gray-800">Critical Findings (English)</h2>
+            </div>
+            <div class="space-y-3">
+                {% for flag in ai_analysis.red_flags %}
+                <div class="bg-red-50 border-r-4 border-red-500 p-4 rounded">
+                    <div class="flex items-center gap-2">
+                        <span class="text-red-500 font-bold">⚠</span>
+                        <p class="text-red-800">{{ flag }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="section-card">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">✓</div>
+                <h2 class="text-xl font-bold text-gray-800">Recommendations (English)</h2>
+            </div>
+            <div class="space-y-3">
+                {% for recommendation in ai_analysis.recommendations %}
+                <div class="bg-green-50 border-r-4 border-green-500 p-4 rounded">
+                    <div class="flex items-start gap-2">
+                        <span class="text-green-500 font-bold mt-1">•</span>
+                        <p class="text-green-800">{{ recommendation }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Follow-up Instructions -->
+        <div class="section-card">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">📅</div>
+                <h2 class="text-xl font-bold text-gray-800">Follow-up Instructions (English)</h2>
+            </div>
+            <div class="bg-orange-50 p-6 rounded-lg">
+                <p class="text-gray-800 leading-relaxed">{{ ai_analysis.follow_up }}</p>
+            </div>
+        </div>
+
+        <!-- Detailed Interpretation -->
+        <div class="section-card">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold">🔍</div>
+                <h2 class="text-xl font-bold text-gray-800">Detailed Interpretation (English)</h2>
+            </div>
+            <div class="bg-gray-50 p-6 rounded-lg">
+                <p class="text-gray-800 leading-relaxed">{{ ai_analysis.interpretation }}</p>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-4 justify-center mt-8">
+            <a href="{{ url_for('download_report', report_id=report.id) }}" 
+               class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                دانلود گزارش
+            </a>
+            <a href="{{ url_for('edit_report', report_id=report.id) }}" 
+               class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                ویرایش گزارش
+            </a>
+            <a href="{{ url_for('reports') }}" 
+               class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                بازگشت به فهرست
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Risk Distribution Pie Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const riskCtx = document.getElementById('riskChart');
+            if (riskCtx) {
+                new Chart(riskCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['وضعیت سالم', 'ریسک متوسط', 'ریسک بالا'],
+                        datasets: [{
+                            data: [40, 35, 25],
+                            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                            borderWidth: 3,
+                            borderColor: '#ffffff',
+                            hoverBorderWidth: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '50%',
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.label + ': ' + context.parsed + '%';
+                                    }
+                                }
+                            }
+                        },
+                        elements: {
+                            arc: {
+                                borderWidth: 2
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        // Initialize charts after page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cholesterol Chart
+            const cholesterolCtx = document.getElementById('cholesterolChart');
+            if (cholesterolCtx) {
+                new Chart(cholesterolCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['کلسترول کل', 'LDL', 'HDL', 'تری‌گلیسرید'],
+                        datasets: [{
+                            label: 'مقدار کنونی',
+                            data: [265, 180, 32, 210],
+                            backgroundColor: ['#ef4444', '#ef4444', '#ef4444', '#ef4444'],
+                            borderColor: ['#dc2626', '#dc2626', '#dc2626', '#dc2626'],
+                            borderWidth: 1
+                        }, {
+                            label: 'حد طبیعی بالا',
+                            data: [200, 100, 40, 150],
+                            backgroundColor: ['#94a3b8', '#94a3b8', '#94a3b8', '#94a3b8'],
+                            borderColor: ['#64748b', '#64748b', '#64748b', '#64748b'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    padding: 15
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 300,
+                                ticks: {
+                                    stepSize: 50
+                                },
+                                grid: {
+                                    display: true,
+                                    color: '#e5e7eb'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        layout: {
+                            padding: {
+                                top: 10,
+                                bottom: 10
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Kidney Function Chart
+            const kidneyCtx = document.getElementById('kidneyChart');
+            if (kidneyCtx) {
+                new Chart(kidneyCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['گلوکز', 'BUN', 'کراتینین', 'سدیم', 'پتاسیم'],
+                        datasets: [{
+                            label: 'مقدار کنونی',
+                            data: [95, 18, 1.0, 140, 4.0],
+                            backgroundColor: ['#10b981', '#10b981', '#10b981', '#10b981', '#10b981'],
+                            borderColor: ['#059669', '#059669', '#059669', '#059669', '#059669'],
+                            borderWidth: 1
+                        }, {
+                            label: 'حد طبیعی بالا',
+                            data: [100, 24, 1.3, 146, 5.0],
+                            backgroundColor: ['#94a3b8', '#94a3b8', '#94a3b8', '#94a3b8', '#94a3b8'],
+                            borderColor: ['#64748b', '#64748b', '#64748b', '#64748b', '#64748b'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    padding: 15
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 160,
+                                ticks: {
+                                    stepSize: 20
+                                },
+                                grid: {
+                                    display: true,
+                                    color: '#e5e7eb'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        layout: {
+                            padding: {
+                                top: 10,
+                                bottom: 10
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

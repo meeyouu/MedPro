@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+
+{% block title %}Samples - MedLab Pro{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto">
+    <!-- Samples Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 animate-slide-up">
+        <div>
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">
+                {{ translations.get('sample_management', 'Sample Management') }}
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">{{ translations.get('track_manage_samples', 'Track and manage laboratory samples throughout the testing process') }}</p>
+        </div>
+        <button data-modal="addSampleModal" class="btn-gradient text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            <span>{{ translations.get('add_sample', 'Add Sample') }}</span>
+        </button>
+    </div>
+
+    <!-- Sample Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 animate-slide-up" style="animation-delay: 0.1s">
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-6 rounded-2xl border border-blue-200 dark:border-blue-800 hover-lift">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-blue-600 dark:text-blue-400 text-sm font-medium mb-1">{{ translations.get('total_samples', 'Total Samples') }}</p>
+                    <p class="text-3xl font-bold text-blue-800 dark:text-blue-200">{{ samples|length }}</p>
+                </div>
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-yellow-50 to-orange-100 dark:from-yellow-900/20 dark:to-orange-800/20 p-6 rounded-2xl border border-yellow-200 dark:border-yellow-800 hover-lift">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-yellow-600 dark:text-yellow-400 text-sm font-medium mb-1">{{ translations.get('processing', 'Processing') }}</p>
+                    <p class="text-3xl font-bold text-yellow-800 dark:text-yellow-200">{{ samples|selectattr('status', 'equalto', 'processing')|list|length }}</p>
+                </div>
+                <div class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-800/20 p-6 rounded-2xl border border-green-200 dark:border-green-800 hover-lift">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-green-600 dark:text-green-400 text-sm font-medium mb-1">{{ translations.get('completed', 'Completed') }}</p>
+                    <p class="text-3xl font-bold text-green-800 dark:text-green-200">{{ samples|selectattr('status', 'equalto', 'completed')|list|length }}</p>
+                </div>
+                <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-red-50 to-pink-100 dark:from-red-900/20 dark:to-pink-800/20 p-6 rounded-2xl border border-red-200 dark:border-red-800 hover-lift">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-red-600 dark:text-red-400 text-sm font-medium mb-1">{{ translations.get('rejected', 'Rejected') }}</p>
+                    <p class="text-3xl font-bold text-red-800 dark:text-red-200">{{ samples|selectattr('status', 'equalto', 'rejected')|list|length }}</p>
+                </div>
+                <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sample Filters -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-8 hover-lift animate-slide-up" style="animation-delay: 0.2s">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">{{ translations.get('filter_samples', 'Filter Samples') }}</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ translations.get('status', 'Status') }}</label>
+                <select class="form-control">
+                    <option value="">{{ translations.get('all_statuses', 'All Statuses') }}</option>
+                    <option value="received">Received</option>
+                    <option value="processing">Processing</option>
+                    <option value="completed">Completed</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ translations.get('sample_type', 'Sample Type') }}</label>
+                <select class="form-control">
+                    <option value="">{{ translations.get('all_types', 'All Types') }}</option>
+                    <option value="blood">Blood</option>
+                    <option value="urine">Urine</option>
+                    <option value="serum">Serum</option>
+                    <option value="plasma">Plasma</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ translations.get('date_range', 'Date Range') }}</label>
+                <input type="date" class="form-control">
+            </div>
+            <div class="flex items-end">
+                <button class="btn-gradient text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:shadow-lg w-full">
+                    {{ translations.get('apply_filters', 'Apply Filters') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Samples Grid -->
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 animate-slide-up" style="animation-delay: 0.3s">
+        {% for sample in samples %}
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 hover-lift transition-all duration-300">
+            <!-- Sample Header -->
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center text-white text-lg font-semibold mr-3">
+                        {{ sample.sample_id[-3:] }}
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">{{ sample.sample_id }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ sample.sample_type.title() }} Sample</p>
+                    </div>
+                </div>
+                
+                <!-- Status Badge -->
+                <div class="flex items-center space-x-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                        {% if sample.status == 'completed' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400
+                        {% elif sample.status == 'processing' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400
+                        {% elif sample.status == 'received' %}bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400
+                        {% elif sample.status == 'rejected' %}bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400
+                        {% else %}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300{% endif %}">
+                        {{ sample.status.title() }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Patient Information -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl mb-4">
+                <h4 class="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-2">Patient Information</h4>
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-semibold mr-3">
+                        {{ sample.test_order.patient.first_name[0] }}{{ sample.test_order.patient.last_name[0] }}
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-blue-800 dark:text-blue-200">{{ sample.test_order.patient.first_name }} {{ sample.test_order.patient.last_name }}</p>
+                        <p class="text-xs text-blue-600 dark:text-blue-400">{{ sample.test_order.patient.patient_id }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Details -->
+            <div class="space-y-3 mb-4">
+                <div class="flex items-center text-sm">
+                    <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                    </svg>
+                    <span class="text-gray-600 dark:text-gray-400">Test: {{ sample.test_order.test_type.name }}</span>
+                </div>
+                
+                <div class="flex items-center text-sm">
+                    <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="text-gray-600 dark:text-gray-400">Collected: {{ sample.collection_date.strftime('%Y-%m-%d %H:%M') if sample.collection_date else 'Not specified' }}</span>
+                </div>
+
+                {% if sample.volume %}
+                <div class="flex items-center text-sm">
+                    <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4"></path>
+                    </svg>
+                    <span class="text-gray-600 dark:text-gray-400">Volume: {{ sample.volume }} mL</span>
+                </div>
+                {% endif %}
+
+                {% if sample.storage_condition %}
+                <div class="flex items-center text-sm">
+                    <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                    <span class="text-gray-600 dark:text-gray-400">Storage: {{ sample.storage_condition }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Quality Indicators -->
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
+                <h5 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Quality Indicators</h5>
+                <div class="grid grid-cols-2 gap-4 text-center">
+                    <div>
+                        <div class="w-8 h-8 mx-auto mb-1 rounded-full flex items-center justify-center
+                            {% if sample.quality_status == 'good' %}bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400
+                            {% elif sample.quality_status == 'fair' %}bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400
+                            {% else %}bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400{% endif %}">
+                            {% if sample.quality_status == 'good' %}✓{% elif sample.quality_status == 'fair' %}!{% else %}✗{% endif %}
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Quality</p>
+                        <p class="text-xs font-medium">{{ sample.quality_status.title() if sample.quality_status else 'Not Checked' }}</p>
+                    </div>
+                    <div>
+                        <div class="w-8 h-8 mx-auto mb-1 rounded-full flex items-center justify-center bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                            📋
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Priority</p>
+                        <p class="text-xs font-medium">{{ sample.priority.title() if sample.priority else 'Normal' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-between space-x-2">
+                <button onclick="viewSample('{{ sample.id }}')" class="flex-1 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-800/50 text-blue-600 dark:text-blue-400 font-medium py-2 px-4 rounded-lg transition-all duration-300 text-sm">
+                    👁️ View
+                </button>
+                {% if sample.status == 'received' %}
+                <button onclick="processSample('{{ sample.id }}')" class="flex-1 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:hover:bg-yellow-800/50 text-yellow-600 dark:text-yellow-400 font-medium py-2 px-4 rounded-lg transition-all duration-300 text-sm">
+                    ⚙️ Process
+                </button>
+                {% elif sample.status == 'processing' %}
+                <button onclick="completeSample('{{ sample.id }}')" class="flex-1 bg-green-100 hover:bg-green-200 dark:bg-green-900/30 dark:hover:bg-green-800/50 text-green-600 dark:text-green-400 font-medium py-2 px-4 rounded-lg transition-all duration-300 text-sm">
+                    ✅ Complete
+                </button>
+                {% endif %}
+                <button onclick="printLabel('{{ sample.id }}')" class="flex-1 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-800/50 text-purple-600 dark:text-purple-400 font-medium py-2 px-4 rounded-lg transition-all duration-300 text-sm">
+                    🏷️ Label
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Add Sample Modal -->
+<div id="addSampleModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-screen overflow-y-auto">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-200">Add New Sample</h3>
+                <button data-close-modal class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="sampleForm" action="{{ url_for('add_sample') }}" method="POST" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Test Order</label>
+                        <select name="test_order_id" required class="form-control">
+                            <option value="">Select Test Order</option>
+                            {% for order in test_orders %}
+                            <option value="{{ order.id }}">{{ order.patient.first_name }} {{ order.patient.last_name }} - {{ order.test_type.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sample Type</label>
+                        <select name="sample_type" required class="form-control">
+                            <option value="">Select Type</option>
+                            <option value="blood">Blood</option>
+                            <option value="serum">Serum</option>
+                            <option value="plasma">Plasma</option>
+                            <option value="urine">Urine</option>
+                            <option value="saliva">Saliva</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Collection Date & Time</label>
+                        <input type="datetime-local" name="collected_at" class="form-control">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Volume (mL)</label>
+                        <input type="number" step="0.1" name="volume" class="form-control" placeholder="e.g., 5.0">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Storage Conditions</label>
+                        <select name="storage_conditions" class="form-control">
+                            <option value="">Select Storage</option>
+                            <option value="room_temperature">Room Temperature</option>
+                            <option value="refrigerated">Refrigerated (2-8°C)</option>
+                            <option value="frozen">Frozen (-20°C)</option>
+                            <option value="deep_frozen">Deep Frozen (-80°C)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Priority</label>
+                        <select name="priority" class="form-control">
+                            <option value="normal">Normal</option>
+                            <option value="urgent">Urgent</option>
+                            <option value="stat">STAT</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Collection Notes</label>
+                    <textarea name="collection_notes" rows="3" class="form-control" placeholder="Any special collection notes or observations..."></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-4 pt-4">
+                    <button type="button" data-close-modal class="px-6 py-2 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-gradient text-white px-6 py-2 rounded-lg transition-all duration-300 hover:shadow-lg">
+                        Add Sample
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function viewSample(sampleId) {
+        console.log('View sample:', sampleId);
+        // Implement view functionality
+    }
+
+    function processSample(sampleId) {
+        console.log('Process sample:', sampleId);
+        // Implement process functionality
+        if (window.medlabApp) {
+            window.medlabApp.showNotification('Sample processing started', 'info');
+        }
+    }
+
+    function completeSample(sampleId) {
+        console.log('Complete sample:', sampleId);
+        // Implement complete functionality
+        if (window.medlabApp) {
+            window.medlabApp.showNotification('Sample marked as completed', 'success');
+        }
+    }
+
+    function printLabel(sampleId) {
+        console.log('Print label for sample:', sampleId);
+        // Implement label printing
+        if (window.medlabApp) {
+            window.medlabApp.showNotification('Label printing...', 'info');
+        }
+    }
+</script>
+{% endblock %}

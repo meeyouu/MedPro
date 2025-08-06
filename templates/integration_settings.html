@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="{{ user.language if user else 'en' }}" dir="{{ 'rtl' if user and user.language == 'fa' else 'ltr' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ translations.integration_settings or 'Integration Settings' }} - MedLab Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #0f172a;
+            --secondary-color: #1e293b;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --border-color: #e5e7eb;
+        }
+        
+        .font-inter { font-family: 'Inter', sans-serif; }
+        .font-vazirmatn { font-family: 'Vazirmatn', sans-serif; }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .connection-status {
+            transition: all 0.3s ease;
+        }
+        
+        .connection-testing {
+            animation: pulse 2s infinite;
+        }
+        
+        .tab-active {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        .form-section {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: var(--bg-primary);
+        }
+        
+        .form-section.disabled {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--accent-color);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen {{ 'font-vazirmatn' if user and user.language == 'fa' else 'font-inter' }}">
+    
+    <!-- Navigation -->
+    <nav class="glass-effect shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="{{ url_for('dashboard') }}" class="flex items-center">
+                        <i class="fas fa-flask text-blue-600 text-2xl {{ 'ml-3' if user and user.language == 'fa' else 'mr-3' }}"></i>
+                        <span class="text-xl font-bold text-gray-900">MedLab Pro</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4 {{ 'space-x-reverse' if user and user.language == 'fa' else '' }}">
+                    <a href="{{ url_for('settings') }}" class="text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-cog {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                        {{ translations.general_settings or 'General Settings' }}
+                    </a>
+                    <span class="text-sm text-gray-500">{{ user.full_name or user.username }}</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="px-4 py-6 sm:px-0">
+            
+            <!-- Header -->
+            <div class="glass-effect rounded-xl p-6 mb-6">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                    <i class="fas fa-plug {{ 'ml-3' if user and user.language == 'fa' else 'mr-3' }} text-blue-600"></i>
+                    {{ translations.integration_settings or 'Integration Settings' }}
+                </h1>
+                <p class="text-gray-600">
+                    {{ translations.configure_external_services or 'Configure AI LLM services, SMS notifications, and MediSina API integration' }}
+                </p>
+            </div>
+
+            <!-- Integration Tabs -->
+            <div class="glass-effect rounded-xl p-6">
+                <div class="flex border-b border-gray-200 mb-6" id="integration-tabs">
+                    <button class="tab-btn tab-active px-4 py-2 {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }} rounded-lg font-medium transition-colors" data-tab="ai-services">
+                        <i class="fas fa-robot {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                        {{ translations.ai_services or 'AI Services' }}
+                    </button>
+                    <button class="tab-btn px-4 py-2 {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }} rounded-lg font-medium transition-colors hover:bg-blue-50" data-tab="sms-center">
+                        <i class="fas fa-sms {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                        {{ translations.sms_center or 'SMS Center' }}
+                    </button>
+                    <button class="tab-btn px-4 py-2 {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }} rounded-lg font-medium transition-colors hover:bg-blue-50" data-tab="medisina-api">
+                        <i class="fas fa-exchange-alt {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                        {{ translations.medisina_api or 'MediSina API' }}
+                    </button>
+                    <button class="tab-btn px-4 py-2 {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }} rounded-lg font-medium transition-colors hover:bg-blue-50" data-tab="system-settings">
+                        <i class="fas fa-cogs {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                        {{ translations.system_settings or 'System Settings' }}
+                    </button>
+                </div>
+
+                <form method="POST" action="{{ url_for('integration_settings') }}" id="integration-form">
+                    
+                    <!-- AI Services Tab -->
+                    <div id="ai-services" class="tab-content">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                            {{ translations.ai_llm_services or 'AI LLM Services Configuration' }}
+                        </h2>
+                        
+                        <!-- Default AI Service -->
+                        <div class="form-section">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3">
+                                {{ translations.default_ai_service or 'Default AI Service' }}
+                            </h3>
+                            <select name="default_ai_service" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="openai" {{ 'selected' if settings.default_ai_service == 'openai' else '' }}>OpenAI GPT</option>
+                                <option value="claude" {{ 'selected' if settings.default_ai_service == 'claude' else '' }}>Anthropic Claude</option>
+                                <option value="gemini" {{ 'selected' if settings.default_ai_service == 'gemini' else '' }}>Google Gemini</option>
+                                <option value="openrouter" {{ 'selected' if settings.default_ai_service == 'openrouter' else '' }}>OpenRouter</option>
+                            </select>
+                        </div>
+
+                        <!-- OpenAI Configuration -->
+                        <div class="form-section" id="openai-section">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800">
+                                    <i class="fab fa-openai text-green-600 {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                                    OpenAI Configuration
+                                </h3>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="openai_enabled" {{ 'checked' if settings.openai_enabled else '' }}>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">API Key</label>
+                                    <div class="relative">
+                                        <input type="password" name="openai_api_key" 
+                                               value="{{ settings.openai_api_key or '' }}"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                               placeholder="sk-...">
+                                        <button type="button" class="absolute {{ 'left-3' if user and user.language == 'fa' else 'right-3' }} top-3 text-gray-400 hover:text-gray-600" onclick="togglePassword(this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Model</label>
+                                    <select name="openai_model" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="gpt-4o" {{ 'selected' if settings.openai_model == 'gpt-4o' else '' }}>GPT-4o</option>
+                                        <option value="gpt-4o-mini" {{ 'selected' if settings.openai_model == 'gpt-4o-mini' else '' }}>GPT-4o Mini</option>
+                                        <option value="gpt-4-turbo" {{ 'selected' if settings.openai_model == 'gpt-4-turbo' else '' }}>GPT-4 Turbo</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <button type="button" class="test-connection-btn bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors" data-service="openai">
+                                    <i class="fas fa-plug {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                                    {{ translations.test_connection or 'Test Connection' }}
+                                </button>
+                                <span class="connection-status {{ 'mr-4' if user and user.language == 'fa' else 'ml-4' }} text-sm"></span>
+                            </div>
+                        </div>
+
+                        <!-- Claude Configuration -->
+                        <div class="form-section" id="claude-section">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800">
+                                    <i class="fas fa-brain text-purple-600 {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                                    Anthropic Claude Configuration
+                                </h3>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="claude_enabled" {{ 'checked' if settings.claude_enabled else '' }}>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">API Key</label>
+                                    <div class="relative">
+                                        <input type="password" name="claude_api_key" 
+                                               value="{{ settings.claude_api_key or '' }}"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                               placeholder="sk-ant-...">
+                                        <button type="button" class="absolute {{ 'left-3' if user and user.language == 'fa' else 'right-3' }} top-3 text-gray-400 hover:text-gray-600" onclick="togglePassword(this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Model</label>
+                                    <select name="claude_model" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="claude-sonnet-4-20250514" {{ 'selected' if settings.claude_model == 'claude-sonnet-4-20250514' else '' }}>Claude Sonnet 4</option>
+                                        <option value="claude-3-7-sonnet-20250219" {{ 'selected' if settings.claude_model == 'claude-3-7-sonnet-20250219' else '' }}>Claude 3.7 Sonnet</option>
+                                        <option value="claude-3-5-sonnet-20241022" {{ 'selected' if settings.claude_model == 'claude-3-5-sonnet-20241022' else '' }}>Claude 3.5 Sonnet</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <button type="button" class="test-connection-btn bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors" data-service="claude">
+                                    <i class="fas fa-plug {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                                    {{ translations.test_connection or 'Test Connection' }}
+                                </button>
+                                <span class="connection-status {{ 'mr-4' if user and user.language == 'fa' else 'ml-4' }} text-sm"></span>
+                            </div>
+                        </div>
+
+                        <!-- Gemini Configuration -->
+                        <div class="form-section" id="gemini-section">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800">
+                                    <i class="fab fa-google text-blue-500 {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                                    Google Gemini Configuration
+                                </h3>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="gemini_enabled" {{ 'checked' if settings.gemini_enabled else '' }}>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">API Key</label>
+                                    <div class="relative">
+                                        <input type="password" name="gemini_api_key" 
+                                               value="{{ settings.gemini_api_key or '' }}"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                               placeholder="AIza...">
+                                        <button type="button" class="absolute {{ 'left-3' if user and user.language == 'fa' else 'right-3' }} top-3 text-gray-400 hover:text-gray-600" onclick="togglePassword(this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Model</label>
+                                    <select name="gemini_model" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="gemini-2.5-flash" {{ 'selected' if settings.gemini_model == 'gemini-2.5-flash' else '' }}>Gemini 2.5 Flash</option>
+                                        <option value="gemini-2.5-pro" {{ 'selected' if settings.gemini_model == 'gemini-2.5-pro' else '' }}>Gemini 2.5 Pro</option>
+                                        <option value="gemini-1.5-pro" {{ 'selected' if settings.gemini_model == 'gemini-1.5-pro' else '' }}>Gemini 1.5 Pro</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <button type="button" class="test-connection-btn bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors" data-service="gemini">
+                                    <i class="fas fa-plug {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                                    {{ translations.test_connection or 'Test Connection' }}
+                                </button>
+                                <span class="connection-status {{ 'mr-4' if user and user.language == 'fa' else 'ml-4' }} text-sm"></span>
+                            </div>
+                        </div>
+
+                        <!-- OpenRouter Configuration -->
+                        <div class="form-section" id="openrouter-section">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800">
+                                    <i class="fas fa-route text-orange-600 {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                                    OpenRouter Configuration
+                                </h3>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="openrouter_enabled" {{ 'checked' if settings.openrouter_enabled else '' }}>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">API Key</label>
+                                    <div class="relative">
+                                        <input type="password" name="openrouter_api_key" 
+                                               value="{{ settings.openrouter_api_key or '' }}"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                               placeholder="sk-or-...">
+                                        <button type="button" class="absolute {{ 'left-3' if user and user.language == 'fa' else 'right-3' }} top-3 text-gray-400 hover:text-gray-600" onclick="togglePassword(this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Model</label>
+                                    <input type="text" name="openrouter_model" 
+                                           value="{{ settings.openrouter_model or '' }}"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="anthropic/claude-3-sonnet">
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <button type="button" class="test-connection-btn bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors" data-service="openrouter">
+                                    <i class="fas fa-plug {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                                    {{ translations.test_connection or 'Test Connection' }}
+                                </button>
+                                <span class="connection-status {{ 'mr-4' if user and user.language == 'fa' else 'ml-4' }} text-sm"></span>
+                            </div>
+                        </div>
+
+                        <!-- LangChain/LangSmith Configuration -->
+                        <div class="form-section">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800">
+                                    <i class="fas fa-link text-indigo-600 {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                                    LangChain & LangSmith Configuration
+                                </h3>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="langsmith_enabled" {{ 'checked' if settings.langsmith_enabled else '' }}>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">LangChain API Key</label>
+                                    <input type="password" name="langchain_api_key" 
+                                           value="{{ settings.langchain_api_key or '' }}"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="ls__...">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">LangSmith Project</label>
+                                    <input type="text" name="langsmith_project" 
+                                           value="{{ settings.langsmith_project or '' }}"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="medlab-pro">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SMS Center Tab -->
+                    <div id="sms-center" class="tab-content hidden">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                            {{ translations.sms_center_configuration or 'SMS Center Configuration' }}
+                        </h2>
+                        
+                        <div class="form-section">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800">
+                                    <i class="fab fa-twilio text-red-600 {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                                    Twilio SMS Configuration
+                                </h3>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="sms_enabled" {{ 'checked' if settings.sms_enabled else '' }}>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Account SID</label>
+                                    <input type="password" name="twilio_account_sid" 
+                                           value="{{ settings.twilio_account_sid or '' }}"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="AC...">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Auth Token</label>
+                                    <input type="password" name="twilio_auth_token" 
+                                           value="{{ settings.twilio_auth_token or '' }}"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="...">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                                    <input type="text" name="twilio_phone_number" 
+                                           value="{{ settings.twilio_phone_number or '' }}"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="+1234567890">
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <button type="button" class="test-connection-btn bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors" data-service="twilio">
+                                    <i class="fas fa-plug {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                                    {{ translations.test_connection or 'Test Connection' }}
+                                </button>
+                                <span class="connection-status {{ 'mr-4' if user and user.language == 'fa' else 'ml-4' }} text-sm"></span>
+                            </div>
+                        </div>
+
+                        <!-- SMS Notification Settings -->
+                        <div class="form-section">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                {{ translations.notification_settings or 'Notification Settings' }}
+                            </h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="email_notifications" {{ 'checked' if settings.email_notifications else '' }} 
+                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                    <label class="{{ 'mr-2' if user and user.language == 'fa' else 'ml-2' }} block text-sm text-gray-700">
+                                        {{ translations.email_notifications or 'Email Notifications' }}
+                                    </label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="sms_notifications" {{ 'checked' if settings.sms_notifications else '' }} 
+                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                    <label class="{{ 'mr-2' if user and user.language == 'fa' else 'ml-2' }} block text-sm text-gray-700">
+                                        {{ translations.sms_notifications or 'SMS Notifications' }}
+                                    </label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="critical_alerts_only" {{ 'checked' if settings.critical_alerts_only else '' }} 
+                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                    <label class="{{ 'mr-2' if user and user.language == 'fa' else 'ml-2' }} block text-sm text-gray-700">
+                                        {{ translations.critical_alerts_only or 'Critical Alerts Only' }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MediSina API Tab -->
+                    <div id="medisina-api" class="tab-content hidden">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                            {{ translations.medisina_api_configuration or 'MediSina API Configuration' }}
+                        </h2>
+                        
+                        <div class="form-section">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800">
+                                    <i class="fas fa-exchange-alt text-green-600 {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                                    MediSina API Configuration
+                                </h3>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="medisina_enabled" {{ 'checked' if settings.medisina_enabled else '' }}>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">API URL</label>
+                                    <input type="url" name="medisina_api_url" 
+                                           value="{{ settings.medisina_api_url or '' }}"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="https://api.medisina.com">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">API Key</label>
+                                    <input type="password" name="medisina_api_key" 
+                                           value="{{ settings.medisina_api_key or '' }}"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="mds_...">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                                    <input type="text" name="medisina_username" 
+                                           value="{{ settings.medisina_username or '' }}"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="username">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                    <input type="password" name="medisina_password" 
+                                           value="{{ settings.medisina_password or '' }}"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           placeholder="password">
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <button type="button" class="test-connection-btn bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors" data-service="medisina">
+                                    <i class="fas fa-plug {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                                    {{ translations.test_connection or 'Test Connection' }}
+                                </button>
+                                <span class="connection-status {{ 'mr-4' if user and user.language == 'fa' else 'ml-4' }} text-sm"></span>
+                            </div>
+                        </div>
+
+                        <!-- Sync Settings -->
+                        <div class="form-section">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                {{ translations.sync_settings or 'Synchronization Settings' }}
+                            </h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ translations.sync_interval or 'Sync Interval (minutes)' }}</label>
+                                    <input type="number" name="medisina_sync_interval" 
+                                           value="{{ settings.medisina_sync_interval or 60 }}"
+                                           min="5" max="1440"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                                <div class="flex items-center pt-6">
+                                    <input type="checkbox" name="medisina_auto_sync" {{ 'checked' if settings.medisina_auto_sync else '' }} 
+                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                    <label class="{{ 'mr-2' if user and user.language == 'fa' else 'ml-2' }} block text-sm text-gray-700">
+                                        {{ translations.auto_sync or 'Enable Auto Sync' }}
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 flex space-x-3 {{ 'space-x-reverse' if user and user.language == 'fa' else '' }}">
+                                <button type="button" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors" onclick="syncWithMediSina('export')">
+                                    <i class="fas fa-upload {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                                    {{ translations.export_to_medisina or 'Export to MediSina' }}
+                                </button>
+                                <button type="button" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors" onclick="syncWithMediSina('import')">
+                                    <i class="fas fa-download {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                                    {{ translations.import_from_medisina or 'Import from MediSina' }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Settings Tab -->
+                    <div id="system-settings" class="tab-content hidden">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                            {{ translations.system_settings or 'System Settings' }}
+                        </h2>
+                        
+                        <div class="form-section">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                {{ translations.export_import_settings or 'Export/Import Settings' }}
+                            </h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ translations.default_export_format or 'Default Export Format' }}</label>
+                                    <select name="default_export_format" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="json" {{ 'selected' if settings.default_export_format == 'json' else '' }}>JSON</option>
+                                        <option value="excel" {{ 'selected' if settings.default_export_format == 'excel' else '' }}>Excel</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ translations.ai_analysis_language or 'AI Analysis Language' }}</label>
+                                    <select name="ai_analysis_language" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="en" {{ 'selected' if settings.ai_analysis_language == 'en' else '' }}>English</option>
+                                        <option value="fa" {{ 'selected' if settings.ai_analysis_language == 'fa' else '' }}>Persian/Farsi</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="include_ai_analysis" {{ 'checked' if settings.include_ai_analysis else '' }} 
+                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                    <label class="{{ 'mr-2' if user and user.language == 'fa' else 'ml-2' }} block text-sm text-gray-700">
+                                        {{ translations.include_ai_analysis or 'Include AI Analysis in Exports' }}
+                                    </label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="include_patient_photos" {{ 'checked' if settings.include_patient_photos else '' }} 
+                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                    <label class="{{ 'mr-2' if user and user.language == 'fa' else 'ml-2' }} block text-sm text-gray-700">
+                                        {{ translations.include_patient_photos or 'Include Patient Photos' }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                {{ translations.performance_settings or 'Performance Settings' }}
+                            </h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ translations.max_concurrent_ai_requests or 'Max Concurrent AI Requests' }}</label>
+                                    <input type="number" name="max_concurrent_ai_requests" 
+                                           value="{{ settings.max_concurrent_ai_requests or 5 }}"
+                                           min="1" max="20"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ translations.ai_timeout_seconds or 'AI Timeout (seconds)' }}</label>
+                                    <input type="number" name="ai_timeout_seconds" 
+                                           value="{{ settings.ai_timeout_seconds or 120 }}"
+                                           min="30" max="300"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Save Button -->
+                    <div class="flex justify-end mt-6">
+                        <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors text-lg font-medium">
+                            <i class="fas fa-save {{ 'ml-2' if user and user.language == 'fa' else 'mr-2' }}"></i>
+                            {{ translations.save_settings or 'Save Settings' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Tab management
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetTab = this.getAttribute('data-tab');
+                    
+                    // Update button states
+                    tabButtons.forEach(btn => btn.classList.remove('tab-active'));
+                    this.classList.add('tab-active');
+                    
+                    // Show/hide content
+                    tabContents.forEach(content => {
+                        if (content.id === targetTab) {
+                            content.classList.remove('hidden');
+                        } else {
+                            content.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+            
+            // Toggle sections based on checkbox states
+            updateSectionStates();
+            
+            // Add event listeners to toggle switches
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', updateSectionStates);
+            });
+        });
+        
+        function updateSectionStates() {
+            const sections = [
+                {checkbox: 'openai_enabled', section: 'openai-section'},
+                {checkbox: 'claude_enabled', section: 'claude-section'},
+                {checkbox: 'gemini_enabled', section: 'gemini-section'},
+                {checkbox: 'openrouter_enabled', section: 'openrouter-section'}
+            ];
+            
+            sections.forEach(({checkbox, section}) => {
+                const checkboxEl = document.querySelector(`input[name="${checkbox}"]`);
+                const sectionEl = document.getElementById(section);
+                
+                if (checkboxEl && sectionEl) {
+                    if (checkboxEl.checked) {
+                        sectionEl.classList.remove('disabled');
+                    } else {
+                        sectionEl.classList.add('disabled');
+                    }
+                }
+            });
+        }
+        
+        function togglePassword(button) {
+            const input = button.parentNode.querySelector('input');
+            const icon = button.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+        
+        // Test connection functionality
+        document.querySelectorAll('.test-connection-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const service = this.getAttribute('data-service');
+                const statusSpan = this.parentNode.querySelector('.connection-status');
+                
+                // Update UI
+                this.classList.add('connection-testing');
+                this.disabled = true;
+                statusSpan.innerHTML = '<i class="fas fa-spinner fa-spin text-blue-500"></i> Testing...';
+                
+                // Make API call
+                fetch('/settings/test-connection', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({service: service})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    this.classList.remove('connection-testing');
+                    this.disabled = false;
+                    
+                    if (data.success) {
+                        statusSpan.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> Connected successfully';
+                        statusSpan.className = 'connection-status ml-4 text-sm text-green-600';
+                    } else {
+                        statusSpan.innerHTML = `<i class="fas fa-times-circle text-red-500"></i> ${data.error}`;
+                        statusSpan.className = 'connection-status ml-4 text-sm text-red-600';
+                    }
+                })
+                .catch(error => {
+                    this.classList.remove('connection-testing');
+                    this.disabled = false;
+                    statusSpan.innerHTML = '<i class="fas fa-times-circle text-red-500"></i> Connection failed';
+                    statusSpan.className = 'connection-status ml-4 text-sm text-red-600';
+                });
+            });
+        });
+        
+        // MediSina sync functionality
+        function syncWithMediSina(direction) {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Syncing...';
+            
+            fetch('/api/medisina/sync', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({direction: direction})
+            })
+            .then(response => response.json())
+            .then(data => {
+                button.disabled = false;
+                button.innerHTML = originalText;
+                
+                if (data.success) {
+                    alert(`Sync completed successfully. ${data.message}`);
+                } else {
+                    alert(`Sync failed: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                button.disabled = false;
+                button.innerHTML = originalText;
+                alert('Sync failed: ' + error.message);
+            });
+        }
+    </script>
+</body>
+</html>

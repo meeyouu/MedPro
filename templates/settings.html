@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - MedLab Pro{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex justify-between items-start">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ translations.get('settings', 'Settings') }}</h1>
+                <p class="text-gray-600 dark:text-gray-400">Manage your account and laboratory settings</p>
+            </div>
+            {% if user.role == 'admin' %}
+            <div class="flex space-x-4 {{ 'space-x-reverse' if user.language == 'fa' else '' }}">
+                <a href="{{ url_for('integration_settings') }}" 
+                   class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center">
+                    <i class="fas fa-plug {{ 'ml-2' if user.language == 'fa' else 'mr-2' }}"></i>
+                    {{ translations.get('integration_settings', 'Integration Settings') }}
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('update_settings') }}" class="space-y-8">
+        <!-- User Settings -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">User Settings</h3>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full Name</label>
+                        <input type="text" name="full_name" value="{{ current_user.full_name or '' }}" 
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-textPrimary dark:text-white">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                        <input type="email" name="email" value="{{ current_user.email or '' }}" 
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-textPrimary dark:text-white">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Username</label>
+                        <input type="text" value="{{ current_user.username }}" disabled 
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Username cannot be changed</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Role</label>
+                        <input type="text" value="{{ current_user.role.title() }}" disabled 
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preferences -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Preferences</h3>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Language</label>
+                        <select name="language" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-textPrimary dark:text-white">
+                            <option value="en" {{ 'selected' if current_user.language == 'en' }}>English</option>
+                            <option value="fa" {{ 'selected' if current_user.language == 'fa' }}>فارسی (Persian)</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Theme</label>
+                        <select name="theme" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-textPrimary dark:text-white">
+                            <option value="light" {{ 'selected' if current_user.theme == 'light' }}>Light</option>
+                            <option value="dark" {{ 'selected' if current_user.theme == 'dark' }}>Dark</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Settings -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Security Settings</h3>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">New Password</label>
+                        <input type="password" name="new_password" 
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-textPrimary dark:text-white">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Leave empty to keep current password</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Confirm New Password</label>
+                        <input type="password" name="confirm_password" 
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-textPrimary dark:text-white">
+                    </div>
+                </div>
+                
+                <div class="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                    <div class="flex items-start">
+                        <i class="fas fa-shield-alt text-yellow-600 dark:text-yellow-400 mt-1 mr-3"></i>
+                        <div>
+                            <h5 class="font-semibold text-yellow-800 dark:text-yellow-200 mb-1">Security Notice</h5>
+                            <p class="text-sm text-yellow-700 dark:text-yellow-300">
+                                All password changes are logged for security purposes. Use a strong password with at least 8 characters including letters, numbers, and special characters.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Laboratory Settings (Admin Only) -->
+        {% if current_user.role == 'admin' and laboratory %}
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Laboratory Settings</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Admin access required</p>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Laboratory Name</label>
+                        <input type="text" value="{{ laboratory.name }}" disabled 
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Contact support to change laboratory name</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">License Number</label>
+                        <input type="text" name="license_number" value="{{ laboratory.license_number or '' }}" 
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-textPrimary dark:text-white">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone</label>
+                        <input type="tel" name="lab_phone" value="{{ laboratory.phone or '' }}" 
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-textPrimary dark:text-white">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                        <input type="email" name="lab_email" value="{{ laboratory.email or '' }}" 
+                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-textPrimary dark:text-white">
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Address</label>
+                        <textarea name="lab_address" rows="3" 
+                                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-textPrimary dark:text-white">{{ laboratory.address or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Account Information -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Account Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Member Since</label>
+                        <div class="text-gray-900 dark:text-white">{{ current_user.created_at.strftime('%B %d, %Y') if current_user.created_at else 'N/A' }}</div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Last Login</label>
+                        <div class="text-gray-900 dark:text-white">{{ current_user.last_login.strftime('%B %d, %Y at %H:%M') if current_user.last_login else 'N/A' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Integration Settings -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">AI Integration</h3>
+            </div>
+            <div class="card-body">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                        <div class="flex items-center">
+                            <i class="fas fa-robot text-green-600 dark:text-green-400 text-xl mr-3"></i>
+                            <div>
+                                <h5 class="font-semibold text-green-800 dark:text-green-200">AI Report Generation</h5>
+                                <p class="text-sm text-green-700 dark:text-green-300">Powered by OpenAI GPT-4o for advanced medical insights</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                Active
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-blue-600 dark:text-blue-400 mt-1 mr-3"></i>
+                            <div>
+                                <h5 class="font-semibold text-blue-800 dark:text-blue-200 mb-1">AI Features Available</h5>
+                                <ul class="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                                    <li>• Comprehensive patient report analysis</li>
+                                    <li>• Trend analysis and pattern recognition</li>
+                                    <li>• Quality control insights</li>
+                                    <li>• Operational efficiency recommendations</li>
+                                    <li>• Clinical significance assessment</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end space-x-4">
+            <button type="button" onclick="resetForm()" class="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                Reset Changes
+            </button>
+            <button type="submit" class="btn-gradient text-white px-6 py-2 rounded-lg font-semibold">
+                <i class="fas fa-save mr-2"></i>
+                {{ translations.get('save', 'Save Settings') }}
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+function resetForm() {
+    if (confirm('Are you sure you want to reset all changes? This will discard any unsaved modifications.')) {
+        document.forms[0].reset();
+    }
+}
+
+// Password confirmation validation
+document.addEventListener('DOMContentLoaded', function() {
+    const newPassword = document.querySelector('input[name="new_password"]');
+    const confirmPassword = document.querySelector('input[name="confirm_password"]');
+    
+    function validatePasswords() {
+        if (newPassword.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity('Passwords do not match');
+        } else {
+            confirmPassword.setCustomValidity('');
+        }
+    }
+    
+    newPassword.addEventListener('input', validatePasswords);
+    confirmPassword.addEventListener('input', validatePasswords);
+});
+
+// Form submission validation
+document.forms[0].addEventListener('submit', function(e) {
+    const newPassword = document.querySelector('input[name="new_password"]').value;
+    const confirmPassword = document.querySelector('input[name="confirm_password"]').value;
+    
+    if (newPassword && newPassword !== confirmPassword) {
+        e.preventDefault();
+        alert('Passwords do not match. Please check your password entries.');
+        return false;
+    }
+    
+    if (newPassword && newPassword.length < 8) {
+        e.preventDefault();
+        alert('Password must be at least 8 characters long.');
+        return false;
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیسیتا - سیستم مدیریت آزمایشگاه پزشکی</title>
+    <meta name="description" content="سیستم جامع مدیریت آزمایشگاه پزشکی با قابلیت تولید گزارش هوشمند توسط هوش مصنوعی">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .medical-gradient {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .success-gradient {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        
+        .warning-gradient {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        
+        .hero-pattern {
+            background-image: 
+                radial-gradient(circle at 25px 25px, rgba(255,255,255,0.1) 2px, transparent 0),
+                radial-gradient(circle at 75px 75px, rgba(255,255,255,0.1) 2px, transparent 0);
+            background-size: 100px 100px;
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .pulse-slow {
+            animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .pricing-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .pricing-card:hover::before {
+            left: 100%;
+        }
+        
+        .pricing-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+            left: 0;
+        }
+        
+        .scroll-smooth {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="scroll-smooth bg-gray-50">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-white/95 backdrop-blur-sm shadow-lg z-50 transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3 space-x-reverse">
+                    <div class="w-12 h-12 medical-gradient rounded-xl flex items-center justify-center">
+                        <i class="fas fa-flask text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">مدیسیتا</h1>
+                        <p class="text-sm text-gray-600">سیستم مدیریت آزمایشگاه</p>
+                    </div>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden lg:flex items-center space-x-8 space-x-reverse">
+                    <a href="#home" class="nav-link text-gray-700 hover:text-blue-600 font-medium">خانه</a>
+                    <a href="#features" class="nav-link text-gray-700 hover:text-blue-600 font-medium">ویژگی‌ها</a>
+                    <a href="#pricing" class="nav-link text-gray-700 hover:text-blue-600 font-medium">قیمت‌گذاری</a>
+                    <a href="#about" class="nav-link text-gray-700 hover:text-blue-600 font-medium">درباره ما</a>
+                    <a href="#contact" class="nav-link text-gray-700 hover:text-blue-600 font-medium">تماس</a>
+                    <a href="/login" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-full hover:shadow-lg transition-all duration-300 font-medium">
+                        ورود به سیستم
+                    </a>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button class="lg:hidden text-gray-700 hover:text-blue-600" id="mobile-menu-btn">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <div class="lg:hidden hidden bg-white rounded-lg shadow-lg mt-2 py-4" id="mobile-menu">
+                <a href="#home" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600">خانه</a>
+                <a href="#features" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600">ویژگی‌ها</a>
+                <a href="#pricing" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600">قیمت‌گذاری</a>
+                <a href="#about" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600">درباره ما</a>
+                <a href="#contact" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600">تماس</a>
+                <a href="/login" class="block mx-4 mt-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-full text-center">ورود به سیستم</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="relative min-h-screen flex items-center justify-center gradient-bg hero-pattern overflow-hidden">
+        <!-- Background Elements -->
+        <div class="absolute inset-0">
+            <div class="absolute top-20 right-20 w-72 h-72 bg-white/10 rounded-full blur-3xl floating"></div>
+            <div class="absolute bottom-20 left-20 w-96 h-96 bg-white/5 rounded-full blur-3xl floating" style="animation-delay: -1.5s;"></div>
+        </div>
+        
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <!-- Hero Content -->
+                <div class="text-white" data-aos="fade-right">
+                    <h1 class="text-5xl lg:text-7xl font-bold leading-tight mb-6">
+                        سیستم هوشمند
+                        <span class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+                            مدیریت آزمایشگاه
+                        </span>
+                    </h1>
+                    <p class="text-xl lg:text-2xl mb-8 text-white/90 leading-relaxed">
+                        مدیریت جامع بیماران، آزمایشات و تولید گزارش‌های پزشکی با قدرت هوش مصنوعی
+                    </p>
+                    
+                    <!-- Feature Highlights -->
+                    <div class="flex flex-wrap gap-4 mb-8">
+                        <div class="flex items-center bg-white/20 rounded-full px-4 py-2 backdrop-blur-sm">
+                            <i class="fas fa-robot text-yellow-400 ml-2"></i>
+                            <span>تحلیل هوش مصنوعی</span>
+                        </div>
+                        <div class="flex items-center bg-white/20 rounded-full px-4 py-2 backdrop-blur-sm">
+                            <i class="fas fa-language text-green-400 ml-2"></i>
+                            <span>پشتیبانی دو زبانه</span>
+                        </div>
+                        <div class="flex items-center bg-white/20 rounded-full px-4 py-2 backdrop-blur-sm">
+                            <i class="fas fa-cloud text-blue-400 ml-2"></i>
+                            <span>مبتنی بر ابر</span>
+                        </div>
+                    </div>
+                    
+                    <!-- CTA Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="#pricing" class="bg-white text-purple-600 px-8 py-4 rounded-full font-bold text-lg hover:shadow-xl transition-all duration-300 text-center">
+                            <i class="fas fa-rocket ml-2"></i>
+                            شروع رایگان
+                        </a>
+                        <a href="#features" class="border-2 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-purple-600 transition-all duration-300 text-center">
+                            <i class="fas fa-play ml-2"></i>
+                            مشاهده دمو
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Hero Illustration -->
+                <div class="relative" data-aos="fade-left">
+                    <div class="relative w-full max-w-lg mx-auto">
+                        <!-- Main Illustration Container -->
+                        <div class="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
+                            <!-- Medical Dashboard Mock -->
+                            <div class="bg-white rounded-2xl p-6 shadow-2xl">
+                                <div class="flex items-center justify-between mb-6">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 medical-gradient rounded-full flex items-center justify-center">
+                                            <i class="fas fa-flask text-white"></i>
+                                        </div>
+                                        <div class="mr-3">
+                                            <h3 class="font-bold text-gray-800">مدیسیتا</h3>
+                                            <p class="text-sm text-gray-600">پنل مدیریت</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-2 space-x-reverse">
+                                        <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                                        <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                                        <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Dashboard Content -->
+                                <div class="space-y-4">
+                                    <!-- Stats -->
+                                    <div class="grid grid-cols-3 gap-3">
+                                        <div class="bg-blue-50 p-3 rounded-lg text-center">
+                                            <div class="text-2xl font-bold text-blue-600">۱۲۳</div>
+                                            <div class="text-xs text-gray-600">بیمار</div>
+                                        </div>
+                                        <div class="bg-green-50 p-3 rounded-lg text-center">
+                                            <div class="text-2xl font-bold text-green-600">۴۵</div>
+                                            <div class="text-xs text-gray-600">آزمایش</div>
+                                        </div>
+                                        <div class="bg-purple-50 p-3 rounded-lg text-center">
+                                            <div class="text-2xl font-bold text-purple-600">۸۹</div>
+                                            <div class="text-xs text-gray-600">گزارش</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Chart Representation -->
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <div class="flex items-end justify-between h-20">
+                                            <div class="bg-blue-400 w-4 h-12 rounded-t"></div>
+                                            <div class="bg-green-400 w-4 h-16 rounded-t"></div>
+                                            <div class="bg-purple-400 w-4 h-8 rounded-t"></div>
+                                            <div class="bg-yellow-400 w-4 h-20 rounded-t"></div>
+                                            <div class="bg-red-400 w-4 h-6 rounded-t"></div>
+                                        </div>
+                                        <div class="text-center text-xs text-gray-600 mt-2">آمار عملکرد</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Floating Elements -->
+                        <div class="absolute -top-4 -right-4 w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg floating">
+                            <i class="fas fa-microscope text-white text-xl"></i>
+                        </div>
+                        <div class="absolute -bottom-4 -left-4 w-14 h-14 bg-green-400 rounded-full flex items-center justify-center shadow-lg floating" style="animation-delay: -2s;">
+                            <i class="fas fa-heartbeat text-white"></i>
+                        </div>
+                        <div class="absolute top-1/2 -left-8 w-12 h-12 bg-red-400 rounded-full flex items-center justify-center shadow-lg floating" style="animation-delay: -3s;">
+                            <i class="fas fa-plus text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-4xl lg:text-5xl font-bold text-gray-800 mb-6">
+                    ویژگی‌های
+                    <span class="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+                        پیشرفته
+                    </span>
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                    مجموعه‌ای کامل از ابزارهای پیشرفته برای مدیریت حرفه‌ای آزمایشگاه پزشکی شما
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1: AI Reports -->
+                <div class="card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-16 h-16 medical-gradient rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-robot text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">گزارش‌های هوش مصنوعی</h3>
+                    <p class="text-gray-600 leading-relaxed mb-6">
+                        تولید خودکار گزارش‌های پزشکی دقیق با استفاده از هوش مصنوعی پیشرفته و تحلیل ۵ بیماری محتمل
+                    </p>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
+                            تحلیل احتمال بیماری
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
+                            توصیه‌های بالینی
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
+                            هشدارهای اورژانسی
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Feature 2: Multi-language -->
+                <div class="card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-16 h-16 success-gradient rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-language text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">پشتیبانی چندزبانه</h3>
+                    <p class="text-gray-600 leading-relaxed mb-6">
+                        رابط کاربری کامل به زبان‌های فارسی و انگلیسی با پشتیبانی از راست‌چین و چپ‌چین
+                    </p>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
+                            فارسی و انگلیسی
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
+                            طراحی RTL/LTR
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
+                            اصطلاحات پزشکی دقیق
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Feature 3: Patient Management -->
+                <div class="card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-16 h-16 warning-gradient rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-users text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">مدیریت بیماران</h3>
+                    <p class="text-gray-600 leading-relaxed mb-6">
+                        ثبت کامل اطلاعات بیماران، سابقه پزشکی، داروها و پیگیری تمام آزمایشات
+                    </p>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
+                            پرونده الکترونیک
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
+                            سابقه پزشکی کامل
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
+                            پیگیری آزمایشات
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Feature 4: Lab Tests -->
+                <div class="card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100" data-aos="fade-up" data-aos-delay="400">
+                    <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-flask text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">مدیریت آزمایشات</h3>
+                    <p class="text-gray-600 leading-relaxed mb-6">
+                        سفارش، پیگیری و ثبت نتایج انواع آزمایشات خونی، ادراری و سایر تست‌های پزشکی
+                    </p>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
+                            انواع آزمایشات
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
+                            محدوده‌های مرجع
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
+                            تفسیر نتایج
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Feature 5: Reports & Analytics -->
+                <div class="card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100" data-aos="fade-up" data-aos-delay="500">
+                    <div class="w-16 h-16 medical-gradient rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-chart-line text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">گزارشات و آنالیز</h3>
+                    <p class="text-gray-600 leading-relaxed mb-6">
+                        تولید انواع گزارشات، نمودارهای تحلیلی و آمار عملکرد آزمایشگاه
+                    </p>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
+                            گزارشات PDF
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
+                            نمودارهای تحلیلی
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
+                            صادرات اکسل
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Feature 6: Security & Compliance -->
+                <div class="card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100" data-aos="fade-up" data-aos-delay="600">
+                    <div class="w-16 h-16 success-gradient rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fas fa-shield-alt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">امنیت و کنترل دسترسی</h3>
+                    <p class="text-gray-600 leading-relaxed mb-6">
+                        سیستم امنیتی پیشرفته با کنترل دسترسی نقش‌محور و حفظ حریم خصوصی بیماران
+                    </p>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
+                            کنترل دسترسی نقش‌محور
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
+                            رمزگذاری داده‌ها
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
+                            سابقه تغییرات
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-4xl lg:text-5xl font-bold text-gray-800 mb-6">
+                    پلان‌های
+                    <span class="bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent">
+                        قیمت‌گذاری
+                    </span>
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                    بهترین پلان را برای نیازهای آزمایشگاه خود انتخاب کنید
+                </p>
+            </div>
+            
+            <!-- Pricing Toggle -->
+            <div class="flex justify-center mb-12" data-aos="fade-up">
+                <div class="bg-white rounded-full p-1 shadow-lg border border-gray-200">
+                    <div class="flex">
+                        <button class="px-6 py-3 rounded-full font-medium transition-all duration-300 text-gray-600 hover:text-gray-800" onclick="togglePricing('monthly')">
+                            ماهانه
+                        </button>
+                        <button class="px-6 py-3 rounded-full font-medium bg-gradient-to-r from-blue-500 to-purple-600 text-white transition-all duration-300" onclick="togglePricing('yearly')">
+                            سالانه
+                            <span class="bg-yellow-400 text-purple-800 text-xs px-2 py-1 rounded-full mr-2 font-bold">۲۰٪ تخفیف</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <!-- Basic Plan -->
+                <div class="pricing-card bg-white rounded-3xl p-8 shadow-lg border border-gray-200" data-aos="fade-up" data-aos-delay="100">
+                    <div class="text-center mb-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-seedling text-gray-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">پایه</h3>
+                        <p class="text-gray-600">برای آزمایشگاه‌های کوچک</p>
+                    </div>
+                    
+                    <div class="text-center mb-8">
+                        <div class="monthly-price">
+                            <span class="text-4xl font-bold text-gray-800">۲۹۹,۰۰۰</span>
+                            <span class="text-gray-600"> تومان/ماه</span>
+                        </div>
+                        <div class="yearly-price hidden">
+                            <span class="text-4xl font-bold text-gray-800">۲,۸۷۰,۴۰۰</span>
+                            <span class="text-gray-600"> تومان/سال</span>
+                            <div class="text-sm text-green-600 font-medium mt-1">۷۱۷,۶۰۰ تومان صرفه‌جویی</div>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">تا ۱۰۰ بیمار در ماه</p>
+                    </div>
+                    
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 ml-3"></i>
+                            <span class="text-gray-700">مدیریت ۱۰۰ بیمار</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 ml-3"></i>
+                            <span class="text-gray-700">انواع آزمایشات پایه</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 ml-3"></i>
+                            <span class="text-gray-700">گزارشات ساده</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 ml-3"></i>
+                            <span class="text-gray-700">پشتیبانی ایمیل</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-times text-gray-400 mt-1 ml-3"></i>
+                            <span class="text-gray-400">تحلیل هوش مصنوعی</span>
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full bg-gray-100 text-gray-800 py-4 rounded-2xl font-bold text-lg hover:bg-gray-200 transition-all duration-300">
+                        شروع رایگان ۳۰ روزه
+                    </button>
+                </div>
+                
+                <!-- Professional Plan -->
+                <div class="pricing-card bg-white rounded-3xl p-8 shadow-xl border-2 border-blue-500 relative transform scale-105" data-aos="fade-up" data-aos-delay="200">
+                    <!-- Popular Badge -->
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-full text-sm font-bold">
+                            محبوب‌ترین
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mb-8">
+                        <div class="w-16 h-16 medical-gradient rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-star text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">حرفه‌ای</h3>
+                        <p class="text-gray-600">برای آزمایشگاه‌های متوسط</p>
+                    </div>
+                    
+                    <div class="text-center mb-8">
+                        <div class="monthly-price">
+                            <span class="text-4xl font-bold text-gray-800">۵۹۹,۰۰۰</span>
+                            <span class="text-gray-600"> تومان/ماه</span>
+                        </div>
+                        <div class="yearly-price hidden">
+                            <span class="text-4xl font-bold text-gray-800">۵,۷۵۰,۴۰۰</span>
+                            <span class="text-gray-600"> تومان/سال</span>
+                            <div class="text-sm text-green-600 font-medium mt-1">۱,۴۳۷,۶۰۰ تومان صرفه‌جویی</div>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">تا ۵۰۰ بیمار در ماه</p>
+                    </div>
+                    
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 ml-3"></i>
+                            <span class="text-gray-700">مدیریت ۵۰۰ بیمار</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 ml-3"></i>
+                            <span class="text-gray-700">تمام انواع آزمایشات</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 ml-3"></i>
+                            <span class="text-gray-700">تحلیل هوش مصنوعی</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 ml-3"></i>
+                            <span class="text-gray-700">گزارشات پیشرفته</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 ml-3"></i>
+                            <span class="text-gray-700">پشتیبانی اولویت‌دار</span>
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-2xl font-bold text-lg hover:shadow-xl transition-all duration-300">
+                        شروع رایگان ۳۰ روزه
+                    </button>
+                </div>
+                
+                <!-- Enterprise Plan -->
+                <div class="pricing-card bg-white rounded-3xl p-8 shadow-lg border border-gray-200" data-aos="fade-up" data-aos-delay="300">
+                    <div class="text-center mb-8">
+                        <div class="w-16 h-16 success-gradient rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-building text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">سازمانی</h3>
+                        <p class="text-gray-600">برای آزمایشگاه‌های بزرگ</p>
+                    </div>
+                    
+                    <div class="text-center mb-8">
+                        <div class="monthly-price">
+                            <span class="text-4xl font-bold text-gray-800">۱,۱۹۹,۰۰۰</span>
+                            <span class="text-gray-600"> تومان/ماه</span>
+                        </div>
+                        <div class="yearly-price hidden">
+                            <span class="text-4xl font-bold text-gray-800">۱۱,۵۱۰,۴۰۰</span>
+                            <span class="text-gray-600"> تومان/سال</span>
+                            <div class="text-sm text-green-600 font-medium mt-1">۲,۸۷۷,۶۰۰ تومان صرفه‌جویی</div>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">بیمار نامحدود</p>
+                    </div>
+                    
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 ml-3"></i>
+                            <span class="text-gray-700">بیمار نامحدود</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 ml-3"></i>
+                            <span class="text-gray-700">تمام ویژگی‌ها</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 ml-3"></i>
+                            <span class="text-gray-700">API سفارشی</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 ml-3"></i>
+                            <span class="text-gray-700">یکپارچه‌سازی</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 ml-3"></i>
+                            <span class="text-gray-700">پشتیبانی ۲۴/۷</span>
+                        </li>
+                    </ul>
+                    
+                    <button class="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white py-4 rounded-2xl font-bold text-lg hover:shadow-xl transition-all duration-300">
+                        تماس با فروش
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div data-aos="fade-right">
+                    <h2 class="text-4xl lg:text-5xl font-bold text-gray-800 mb-8">
+                        درباره
+                        <span class="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
+                            مدیسیتا
+                        </span>
+                    </h2>
+                    <p class="text-xl text-gray-600 leading-relaxed mb-6">
+                        مدیسیتا یک سیستم مدیریت آزمایشگاه پزشکی مدرن و کامل است که با استفاده از جدیدترین تکنولوژی‌های هوش مصنوعی طراحی شده است.
+                    </p>
+                    <p class="text-lg text-gray-600 leading-relaxed mb-8">
+                        هدف ما ارائه راه‌حلی جامع و کاربردی برای بهبود کیفیت خدمات آزمایشگاهی و تسهیل فرآیندهای تشخیص پزشکی است.
+                    </p>
+                    
+                    <!-- Stats -->
+                    <div class="grid grid-cols-2 gap-8 mb-8">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold medical-gradient bg-clip-text text-transparent mb-2">۱۰۰+</div>
+                            <div class="text-gray-600">آزمایشگاه فعال</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold medical-gradient bg-clip-text text-transparent mb-2">۱۰۰۰+</div>
+                            <div class="text-gray-600">بیمار در ماه</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold medical-gradient bg-clip-text text-transparent mb-2">۹۹.۹٪</div>
+                            <div class="text-gray-600">دقت تشخیص</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold medical-gradient bg-clip-text text-transparent mb-2">۲۴/۷</div>
+                            <div class="text-gray-600">پشتیبانی</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative" data-aos="fade-left">
+                    <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl p-8 text-white">
+                        <h3 class="text-2xl font-bold mb-6">چرا مدیسیتا؟</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <i class="fas fa-brain text-yellow-300 mt-1 ml-3"></i>
+                                <div>
+                                    <h4 class="font-bold mb-1">هوش مصنوعی پیشرفته</h4>
+                                    <p class="text-white/80 text-sm">تحلیل دقیق و سریع نتایج آزمایشات</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-shield-alt text-green-300 mt-1 ml-3"></i>
+                                <div>
+                                    <h4 class="font-bold mb-1">امنیت بالا</h4>
+                                    <p class="text-white/80 text-sm">حفظ حریم خصوصی بیماران</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-rocket text-red-300 mt-1 ml-3"></i>
+                                <div>
+                                    <h4 class="font-bold mb-1">عملکرد سریع</h4>
+                                    <p class="text-white/80 text-sm">پردازش سریع و کارآمد</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-headset text-pink-300 mt-1 ml-3"></i>
+                                <div>
+                                    <h4 class="font-bold mb-1">پشتیبانی عالی</h4>
+                                    <p class="text-white/80 text-sm">تیم متخصص آماده کمک</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Floating elements -->
+                    <div class="absolute -top-6 -right-6 w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center shadow-xl floating">
+                        <i class="fas fa-award text-white text-2xl"></i>
+                    </div>
+                    <div class="absolute -bottom-6 -left-6 w-16 h-16 bg-green-400 rounded-full flex items-center justify-center shadow-xl floating" style="animation-delay: -1s;">
+                        <i class="fas fa-certificate text-white text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-4xl lg:text-5xl font-bold text-gray-800 mb-6">
+                    تماس با
+                    <span class="bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent">
+                        ما
+                    </span>
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                    برای دریافت مشاوره رایگان و آموزش سیستم با ما در ارتباط باشید
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-16 max-w-6xl mx-auto">
+                <!-- Contact Info -->
+                <div data-aos="fade-right">
+                    <div class="bg-white rounded-3xl p-8 shadow-lg">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-8">اطلاعات تماس</h3>
+                        
+                        <div class="space-y-6">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 medical-gradient rounded-xl flex items-center justify-center ml-4">
+                                    <i class="fas fa-map-marker-alt text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-800">آدرس</h4>
+                                    <p class="text-gray-600">تهران، میدان ولیعصر، ساختمان مدیسیتا</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 success-gradient rounded-xl flex items-center justify-center ml-4">
+                                    <i class="fas fa-phone text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-800">تلفن</h4>
+                                    <p class="text-gray-600" dir="ltr">+98 21 1234 5678</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 warning-gradient rounded-xl flex items-center justify-center ml-4">
+                                    <i class="fas fa-envelope text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-800">ایمیل</h4>
+                                    <p class="text-gray-600" dir="ltr">info@medisita.com</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 gradient-bg rounded-xl flex items-center justify-center ml-4">
+                                    <i class="fas fa-clock text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-800">ساعات کاری</h4>
+                                    <p class="text-gray-600">شنبه تا پنج‌شنبه: ۸:۰۰ - ۱۸:۰۰</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Social Links -->
+                        <div class="mt-8 pt-8 border-t border-gray-200">
+                            <h4 class="font-bold text-gray-800 mb-4">شبکه‌های اجتماعی</h4>
+                            <div class="flex space-x-4 space-x-reverse">
+                                <a href="#" class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors">
+                                    <i class="fab fa-telegram"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 bg-pink-500 text-white rounded-full flex items-center justify-center hover:bg-pink-600 transition-colors">
+                                    <i class="fab fa-instagram"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
+                                    <i class="fab fa-linkedin"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center hover:bg-green-600 transition-colors">
+                                    <i class="fab fa-whatsapp"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contact Form -->
+                <div data-aos="fade-left">
+                    <div class="bg-white rounded-3xl p-8 shadow-lg">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-8">فرم تماس</h3>
+                        
+                        <form class="space-y-6">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">نام و نام خانوادگی</label>
+                                    <input type="text" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300" placeholder="نام خود را وارد کنید">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">تلفن همراه</label>
+                                    <input type="tel" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300" placeholder="09123456789" dir="ltr">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">ایمیل</label>
+                                <input type="email" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300" placeholder="email@example.com" dir="ltr">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">نوع آزمایشگاه</label>
+                                <select class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300">
+                                    <option>انتخاب کنید</option>
+                                    <option>آزمایشگاه کوچک (زیر ۱۰۰ بیمار)</option>
+                                    <option>آزمایشگاه متوسط (۱۰۰-۵۰۰ بیمار)</option>
+                                    <option>آزمایشگاه بزرگ (بالای ۵۰۰ بیمار)</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2">پیام</label>
+                                <textarea rows="4" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 resize-none" placeholder="پیام خود را بنویسید..."></textarea>
+                            </div>
+                            
+                            <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-xl font-bold text-lg hover:shadow-xl transition-all duration-300">
+                                <i class="fas fa-paper-plane ml-2"></i>
+                                ارسال پیام
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-16">
+        <div class="container mx-auto px-4">
+            <div class="grid lg:grid-cols-4 gap-8">
+                <!-- Company Info -->
+                <div>
+                    <div class="flex items-center space-x-3 space-x-reverse mb-6">
+                        <div class="w-12 h-12 medical-gradient rounded-xl flex items-center justify-center">
+                            <i class="fas fa-flask text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold">مدیسیتا</h1>
+                            <p class="text-sm text-gray-400">سیستم مدیریت آزمایشگاه</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 leading-relaxed mb-6">
+                        سیستم جامع مدیریت آزمایشگاه پزشکی با قابلیت تولید گزارش هوشمند توسط هوش مصنوعی
+                    </p>
+                    <div class="flex space-x-4 space-x-reverse">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-telegram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-linkedin text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-whatsapp text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-xl font-bold mb-6">لینک‌های سریع</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#home" class="text-gray-400 hover:text-white transition-colors">خانه</a></li>
+                        <li><a href="#features" class="text-gray-400 hover:text-white transition-colors">ویژگی‌ها</a></li>
+                        <li><a href="#pricing" class="text-gray-400 hover:text-white transition-colors">قیمت‌گذاری</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-white transition-colors">درباره ما</a></li>
+                        <li><a href="#contact" class="text-gray-400 hover:text-white transition-colors">تماس</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Services -->
+                <div>
+                    <h3 class="text-xl font-bold mb-6">خدمات</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">مدیریت بیماران</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">آزمایشات پزشکی</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">گزارش‌های هوش مصنوعی</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">تحلیل و آمار</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">پشتیبانی فنی</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contact Info -->
+                <div>
+                    <h3 class="text-xl font-bold mb-6">اطلاعات تماس</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-center">
+                            <i class="fas fa-map-marker-alt text-blue-400 ml-3"></i>
+                            <span class="text-gray-400">تهران، میدان ولیعصر</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone text-green-400 ml-3"></i>
+                            <span class="text-gray-400" dir="ltr">+98 21 1234 5678</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope text-yellow-400 ml-3"></i>
+                            <span class="text-gray-400" dir="ltr">info@medisita.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center">
+                <p class="text-gray-400">
+                    © ۱۴۰۳ مدیسیتا. تمامی حقوق محفوظ است.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="fixed bottom-8 left-8 w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 opacity-0 invisible">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100
+        });
+
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Navbar Scroll Effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                navbar.classList.add('bg-white/95', 'shadow-lg');
+            } else {
+                navbar.classList.remove('bg-white/95', 'shadow-lg');
+            }
+        });
+
+        // Pricing Toggle
+        function togglePricing(type) {
+            const monthlyPrices = document.querySelectorAll('.monthly-price');
+            const yearlyPrices = document.querySelectorAll('.yearly-price');
+            const buttons = document.querySelectorAll('[onclick*="togglePricing"]');
+
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-gradient-to-r', 'from-blue-500', 'to-purple-600', 'text-white');
+                btn.classList.add('text-gray-600');
+            });
+
+            if (type === 'monthly') {
+                monthlyPrices.forEach(price => price.classList.remove('hidden'));
+                yearlyPrices.forEach(price => price.classList.add('hidden'));
+                buttons[0].classList.add('bg-gradient-to-r', 'from-blue-500', 'to-purple-600', 'text-white');
+                buttons[0].classList.remove('text-gray-600');
+            } else {
+                monthlyPrices.forEach(price => price.classList.add('hidden'));
+                yearlyPrices.forEach(price => price.classList.remove('hidden'));
+                buttons[1].classList.add('bg-gradient-to-r', 'from-blue-500', 'to-purple-600', 'text-white');
+                buttons[1].classList.remove('text-gray-600');
+            }
+        }
+
+        // Back to Top Button
+        const backToTopBtn = document.getElementById('back-to-top');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 500) {
+                backToTopBtn.classList.remove('opacity-0', 'invisible');
+                backToTopBtn.classList.add('opacity-100', 'visible');
+            } else {
+                backToTopBtn.classList.add('opacity-0', 'invisible');
+                backToTopBtn.classList.remove('opacity-100', 'visible');
+            }
+        });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Smooth Scrolling for Navigation Links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                if (targetSection) {
+                    const offsetTop = targetSection.offsetTop - 80;
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Close mobile menu if open
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+
+        // Form Submission (placeholder)
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('پیام شما با موفقیت ارسال شد. به زودی با شما تماس خواهیم گرفت.');
+        });
+    </script>
+</body>
+</html>

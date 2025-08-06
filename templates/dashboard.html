@@ -1,0 +1,351 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - MedLab Pro{% endblock %}
+
+{% block head %}
+<script>
+    // Dashboard chart data
+    window.testDistributionData = {
+        labels: {{ test_distribution|map(attribute='0')|list|tojson }},
+        data: {{ test_distribution|map(attribute='1')|list|tojson }}
+    };
+    
+    window.monthlyTrendsData = {
+        labels: {{ monthly_trends|map(attribute='0')|list|tojson }},
+        data: {{ monthly_trends|map(attribute='1')|list|tojson }}
+    };
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-7xl mx-auto">
+    <!-- Dashboard Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 animate-slide-up">
+        <div>
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                {{ translations.get('dashboard', 'Dashboard') }}
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">{{ translations.get('welcome_back', 'Welcome back! Here\'s your laboratory overview') }}</p>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <button class="btn-gradient text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                <span>{{ translations.get('add_test_order', 'Add Test Order') }}</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-slide-up" style="animation-delay: 0.1s">
+        <!-- Total Tests -->
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-6 rounded-2xl border border-blue-200 dark:border-blue-800 hover-lift">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-blue-600 dark:text-blue-400 text-sm font-medium mb-1">{{ translations.get('total_tests', 'Total Tests') }}</p>
+                    <p class="text-3xl font-bold text-blue-800 dark:text-blue-200">{{ stats.total_tests }}</p>
+                    <p class="text-blue-600 dark:text-blue-400 text-xs mt-1">+12% from last month</p>
+                </div>
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Results -->
+        <div class="bg-gradient-to-br from-yellow-50 to-orange-100 dark:from-yellow-900/20 dark:to-orange-800/20 p-6 rounded-2xl border border-yellow-200 dark:border-yellow-800 hover-lift">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-yellow-600 dark:text-yellow-400 text-sm font-medium mb-1">{{ translations.get('pending_results', 'Pending Results') }}</p>
+                    <p class="text-3xl font-bold text-yellow-800 dark:text-yellow-200">{{ stats.pending_results }}</p>
+                    <p class="text-yellow-600 dark:text-yellow-400 text-xs mt-1">{{ translations.get('need_attention', 'Need attention') }}</p>
+                </div>
+                <div class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completed Today -->
+        <div class="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-800/20 p-6 rounded-2xl border border-green-200 dark:border-green-800 hover-lift">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-green-600 dark:text-green-400 text-sm font-medium mb-1">{{ translations.get('completed_today', 'Completed Today') }}</p>
+                    <p class="text-3xl font-bold text-green-800 dark:text-green-200">{{ stats.completed_today }}</p>
+                    <p class="text-green-600 dark:text-green-400 text-xs mt-1">{{ translations.get('great_progress', 'Great progress!') }}</p>
+                </div>
+                <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Critical Values -->
+        <div class="bg-gradient-to-br from-red-50 to-pink-100 dark:from-red-900/20 dark:to-pink-800/20 p-6 rounded-2xl border border-red-200 dark:border-red-800 hover-lift">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-red-600 dark:text-red-400 text-sm font-medium mb-1">{{ translations.get('critical_values', 'Critical Values') }}</p>
+                    <p class="text-3xl font-bold text-red-800 dark:text-red-200">{{ stats.critical_values }}</p>
+                    <p class="text-red-600 dark:text-red-400 text-xs mt-1">{{ translations.get('urgent_review', 'Urgent review') }}</p>
+                </div>
+                <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Test Distribution Chart -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 hover-lift animate-slide-up" style="animation-delay: 0.2s">
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6 flex items-center">
+                <span class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white text-sm mr-3">📊</span>
+                {{ translations.get('test_distribution', 'Test Distribution by Category') }}
+            </h3>
+            <div class="relative h-64">
+                <canvas id="testDistributionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Monthly Trends Chart -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 hover-lift animate-slide-up" style="animation-delay: 0.3s">
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-6 flex items-center">
+                <span class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm mr-3">📈</span>
+                {{ translations.get('monthly_trends', 'Monthly Test Trends') }}
+            </h3>
+            <div class="relative h-64">
+                <canvas id="monthlyTrendsChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 hover-lift animate-slide-up" style="animation-delay: 0.4s">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 flex items-center">
+                <span class="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center text-white text-sm mr-3">🕐</span>
+                {{ translations.get('recent_test_orders', 'Recent Test Orders') }}
+            </h3>
+            <a href="{{ url_for('tests') }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium text-sm transition-colors">
+                {{ translations.get('view_all', 'View All') }} →
+            </a>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-gray-200 dark:border-gray-700">
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-400">Patient</th>
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-400">Test Type</th>
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-400">Status</th>
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-400">Date</th>
+                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-400">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for test in recent_tests %}
+                    <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <td class="py-4 px-4">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-semibold mr-3">
+                                    {{ test.patient.first_name[0] }}{{ test.patient.last_name[0] }}
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-800 dark:text-gray-200">{{ test.patient.first_name }} {{ test.patient.last_name }}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ test.patient.patient_id }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-4 px-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                                {{ test.test_type.name }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium 
+                                {% if test.status == 'completed' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400{% elif test.status == 'processing' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400{% elif test.status == 'pending' %}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300{% else %}bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400{% endif %}">
+                                {{ test.status.title() }}
+                            </span>
+                        </td>
+                        <td class="py-4 px-4 text-sm text-gray-600 dark:text-gray-400">
+                            {{ test.ordered_at.strftime('%Y-%m-%d %H:%M') }}
+                        </td>
+                        <td class="py-4 px-4">
+                            <div class="flex items-center space-x-2">
+                                <button class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </button>
+                                {% if test.status == 'pending' %}
+                                <button class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 animate-slide-up" style="animation-delay: 0.5s">
+        <!-- Add Patient -->
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-800/20 p-6 rounded-2xl border border-blue-200 dark:border-blue-800 hover-lift cursor-pointer" onclick="window.location.href='{{ url_for('patients') }}'">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mr-4">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                    </svg>
+                </div>
+                <h4 class="text-lg font-semibold text-blue-800 dark:text-blue-200">{{ translations.get('add_patient', 'Add Patient') }}</h4>
+            </div>
+            <p class="text-blue-600 dark:text-blue-400 text-sm">{{ translations.get('register_new_patients_and_manage', 'Register new patients and manage their information') }}</p>
+        </div>
+
+        <!-- Order Test -->
+        <div class="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-800/20 p-6 rounded-2xl border border-green-200 dark:border-green-800 hover-lift cursor-pointer" onclick="window.location.href='{{ url_for('tests') }}'">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mr-4">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                    </svg>
+                </div>
+                <h4 class="text-lg font-semibold text-green-800 dark:text-green-200">{{ translations.get('order_tests', 'Order Tests') }}</h4>
+            </div>
+            <p class="text-green-600 dark:text-green-400 text-sm">{{ translations.get('create_new_test_orders', 'Create new test orders and manage samples') }}</p>
+        </div>
+
+        <!-- Generate Reports -->
+        <div class="bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900/20 dark:to-pink-800/20 p-6 rounded-2xl border border-purple-200 dark:border-purple-800 hover-lift cursor-pointer" onclick="window.location.href='{{ url_for('reports') }}'">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mr-4">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <h4 class="text-lg font-semibold text-purple-800 dark:text-purple-200">{{ translations.get('ai_reports', 'AI Reports') }}</h4>
+            </div>
+            <p class="text-purple-600 dark:text-purple-400 text-sm">{{ translations.get('generate_intelligent_medical', 'Generate intelligent medical reports with AI analysis') }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize dashboard charts when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Test Distribution Chart
+        const testDistributionCtx = document.getElementById('testDistributionChart');
+        if (testDistributionCtx) {
+            new Chart(testDistributionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        '{{ translations.get("blood_tests", "Blood Tests") }}',
+                        '{{ translations.get("urine_tests", "Urine Tests") }}',
+                        '{{ translations.get("genetic_tests", "Genetic Tests") }}',
+                        '{{ translations.get("microbiology", "Microbiology") }}'
+                    ],
+                    datasets: [{
+                        data: [45, 30, 15, 10],
+                        backgroundColor: [
+                            '#3B82F6', // Blue
+                            '#10B981', // Green
+                            '#8B5CF6', // Purple
+                            '#F59E0B'  // Yellow
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                color: document.documentElement.classList.contains('dark') ? '#E5E7EB' : '#374151'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Monthly Trends Chart
+        const monthlyTrendsCtx = document.getElementById('monthlyTrendsChart');
+        if (monthlyTrendsCtx) {
+            new Chart(monthlyTrendsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: '{{ translations.get("tests_completed", "Tests Completed") }}',
+                        data: [120, 135, 118, 145, 162, 180],
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#3B82F6',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: document.documentElement.classList.contains('dark') ? '#374151' : '#E5E7EB'
+                            },
+                            ticks: {
+                                color: document.documentElement.classList.contains('dark') ? '#9CA3AF' : '#6B7280'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: document.documentElement.classList.contains('dark') ? '#9CA3AF' : '#6B7280'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

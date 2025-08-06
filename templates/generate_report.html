@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}{{ translations.get('generate_report', 'Generate Report') }} - MedLab Pro{% endblock %}
+
+{% block content %}
+<div class="p-6 max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    <i class="fas fa-brain text-purple-600 mr-3"></i>
+                    {{ translations.get('generate_ai_report', 'Generate AI Report') }}
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400">{{ translations.get('create_intelligent_medical_report', 'Create intelligent medical reports with AI-powered analysis') }}</p>
+            </div>
+            <a href="{{ url_for('reports') }}" class="btn bg-gray-500 hover:bg-gray-600 text-white">
+                <i class="fas fa-arrow-left mr-2"></i>
+                {{ translations.get('back_to_reports', 'Back to Reports') }}
+            </a>
+        </div>
+    </div>
+
+    <!-- Generate Report Form -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+        <form action="{{ url_for('generate_report') }}" method="POST" class="space-y-6">
+            <!-- Patient Selection -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    {{ translations.get('select_patient', 'Select Patient') }}
+                </label>
+                <select name="patient_id" required 
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    <option value="">{{ translations.get('choose_patient', 'Choose a patient...') }}</option>
+                    {% for patient in patients %}
+                    <option value="{{ patient.id }}">
+                        {{ patient.first_name }} {{ patient.last_name }} 
+                        {% if patient.patient_id %}({{ patient.patient_id }}){% endif %}
+                        - {{ patient.age }} {{ translations.get('years_old', 'years old') }}
+                    </option>
+                    {% endfor %}
+                </select>
+                {% if not patients %}
+                <p class="text-sm text-yellow-600 dark:text-yellow-400 mt-2">
+                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                    {{ translations.get('no_patients_available', 'No patients available. Please register patients first.') }}
+                </p>
+                {% endif %}
+            </div>
+
+            <!-- Report Type Selection -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    {{ translations.get('report_type', 'Report Type') }}
+                </label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label class="flex items-center p-4 border border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                        <input type="radio" name="report_type" value="comprehensive" class="mr-3 text-blue-600 focus:ring-blue-500" checked>
+                        <div>
+                            <div class="font-semibold text-gray-900 dark:text-white">{{ translations.get('comprehensive_analysis', 'Comprehensive Analysis') }}</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">{{ translations.get('detailed_medical_analysis', 'Detailed medical analysis with disease probability') }}</div>
+                        </div>
+                    </label>
+                    
+                    <label class="flex items-center p-4 border border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                        <input type="radio" name="report_type" value="summary" class="mr-3 text-blue-600 focus:ring-blue-500">
+                        <div>
+                            <div class="font-semibold text-gray-900 dark:text-white">{{ translations.get('summary_report', 'Summary Report') }}</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">{{ translations.get('quick_overview_findings', 'Quick overview of key findings') }}</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Analysis Options -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    {{ translations.get('analysis_options', 'Analysis Options') }}
+                </label>
+                <div class="space-y-3">
+                    <label class="flex items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <input type="checkbox" name="include_disease_analysis" value="true" class="mr-3 text-blue-600 focus:ring-blue-500" checked>
+                        <div>
+                            <div class="font-medium text-gray-900 dark:text-white">{{ translations.get('disease_probability_analysis', 'Disease Probability Analysis') }}</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">{{ translations.get('analyze_probable_conditions', 'Analyze probable medical conditions') }}</div>
+                        </div>
+                    </label>
+                    
+                    <label class="flex items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <input type="checkbox" name="include_recommendations" value="true" class="mr-3 text-blue-600 focus:ring-blue-500" checked>
+                        <div>
+                            <div class="font-medium text-gray-900 dark:text-white">{{ translations.get('clinical_recommendations', 'Clinical Recommendations') }}</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">{{ translations.get('suggest_follow_up_actions', 'Suggest follow-up actions and treatments') }}</div>
+                        </div>
+                    </label>
+                    
+                    <label class="flex items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <input type="checkbox" name="include_red_flags" value="true" class="mr-3 text-blue-600 focus:ring-blue-500" checked>
+                        <div>
+                            <div class="font-medium text-gray-900 dark:text-white">{{ translations.get('red_flag_alerts', 'Red Flag Alerts') }}</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">{{ translations.get('identify_critical_findings', 'Identify critical findings requiring immediate attention') }}</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Language Selection -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    {{ translations.get('report_language', 'Report Language') }}
+                </label>
+                <select name="report_language" 
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    <option value="fa" {% if user.language == 'fa' %}selected{% endif %}>فارسی (Persian)</option>
+                    <option value="en" {% if user.language == 'en' %}selected{% endif %}>English</option>
+                </select>
+            </div>
+
+            <!-- AI Service Selection (Admin Only) -->
+            {% if user.role == 'admin' %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    {{ translations.get('ai_service', 'AI Service') }}
+                    <span class="text-xs text-gray-500">({{ translations.get('admin_only', 'Admin Only') }})</span>
+                </label>
+                <select name="ai_service" 
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    <option value="openai">OpenAI GPT-4o</option>
+                    <option value="claude">Anthropic Claude</option>
+                    <option value="gemini">Google Gemini</option>
+                    <option value="openrouter">OpenRouter</option>
+                </select>
+            </div>
+            {% endif %}
+
+            <!-- Generate Button -->
+            <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <a href="{{ url_for('reports') }}" 
+                   class="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    {{ translations.get('cancel', 'Cancel') }}
+                </a>
+                <button type="submit" 
+                        class="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                        {% if not patients %}disabled{% endif %}>
+                    <i class="fas fa-brain mr-2"></i>
+                    {{ translations.get('generate_ai_report', 'Generate AI Report') }}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Information Panel -->
+    <div class="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-info-circle text-blue-600 dark:text-blue-400 text-xl"></i>
+            </div>
+            <div class="ml-4">
+                <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-2">
+                    {{ translations.get('about_ai_reports', 'About AI-Powered Reports') }}
+                </h3>
+                <div class="text-blue-700 dark:text-blue-300 space-y-2">
+                    <p>{{ translations.get('ai_report_info_1', 'Our AI analyzes patient test results, medical history, and symptoms to generate comprehensive medical reports.') }}</p>
+                    <p>{{ translations.get('ai_report_info_2', 'Reports include disease probability analysis, clinical recommendations, and red flag alerts for critical findings.') }}</p>
+                    <p class="font-medium">{{ translations.get('ai_report_disclaimer', 'Note: AI-generated reports are for assistance only and should be reviewed by qualified medical professionals.') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
